@@ -1,0 +1,230 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* =========================================================================
+       Helper Functions
+       ========================================================================= */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isOwnerOfExistingDoc(userId) {
+      return isOwner(userId) && isExistingDoc();
+    }
+
+    function getOrg(organizationId) {
+      return get(/databases/$(database)/documents/organizations/$(organizationId));
+    }
+
+    function isOrgMember(organizationId) {
+      let orgDoc = getOrg(organizationId);
+      return isSignedIn()
+        && orgDoc != null
+        && orgDoc.data.members is map
+        && request.auth.uid in orgDoc.data.members;
+    }
+
+    function isOrgAdmin(organizationId) {
+      let orgDoc = getOrg(organizationId);
+      return isOrgMember(organizationId)
+        && orgDoc.data.members[request.auth.uid].lower() == 'admin';
+    }
+    
+    function isAdminRole() {
+      let userDocPath = /databases/$(database)/documents/users/$(request.auth.uid);
+      return isSignedIn() 
+        && exists(userDocPath) 
+        && get(userDocPath).data.role == 'Admin';
+    }
+
+    function getModule(organizationId, moduleId) {
+      return get(/databases/$(database)/documents/organizations/$(organizationId)/modules/$(moduleId));
+    }
+
+    function isModuleMember(organizationId, moduleId) {
+      let moduleDoc = getModule(organizationId, moduleId);
+      return isSignedIn()
+        && moduleDoc != null
+        && moduleDoc.data.members is map
+        && request.auth.uid in moduleDoc.data.members;
+    }
+
+    function isModuleAdmin(organizationId, moduleId) {
+      let moduleDoc = getModule(organizationId, moduleId);
+      return isModuleMember(organizationId, moduleId)
+        && moduleDoc.data.members[request.auth.uid] == 'admin';
+    }
+
+    /* =========================================================================
+       Users
+       ========================================================================= */
+
+    match /users/{userId} {
+      allow get, create: if isOwner(userId);
+      allow update, delete: if isOwnerOfExistingDoc(userId);
+      allow list: if false;
+
+      match /notifications/{notificationId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.userId == userId;
+        allow update: if isOwnerOfExistingDoc(userId)
+          && request.resource.data.userId == resource.data.userId;
+        allow delete: if isOwnerOfExistingDoc(userId);
+      }
+    }
+
+    /* =========================================================================
+       Organizations
+       ========================================================================= */
+
+    match /organizations/{organizationId} {
+      allow get: if isOrgMember(organizationId);
+      allow create: if isSignedIn();
+      allow update, delete: if isOrgAdmin(organizationId);
+      allow list: if false;
+
+      /* ---------------- Members ---------------- */
+
+      match /members/{memberId} {
+        allow get, list: if isOrgMember(organizationId);
+        allow create, update, delete: if isOrgAdmin(organizationId);
+      }
+
+      /* ---------------- Invites ---------------- */
+
+      match /invites/{inviteId} {
+        allow get, list: if isOrgMember(organizationId);
+        allow create, update, delete: if isOrgAdmin(organizationId);
+      }
+
+      /* ---------------- Workflows ---------------- */
+
+      match /workflows/{workflowId} {
+        allow get, list: if isOrgMember(organizationId);
+        allow create, update, delete: if isOrgAdmin(organizationId);
+      }
+
+      /* ---------------- Automation Rules ---------------- */
+
+      match /automation_rules/{ruleId} {
+        allow get, list: if isOrgMember(organizationId);
+        allow create, update, delete: if isOrgAdmin(organizationId);
+      }
+
+      /* ---------------- Webhooks ---------------- */
+
+      match /webhooks/{webhookId} {
+        allow get, list: if isOrgMember(organizationId);
+        allow create, update, delete: if isOrgAdmin(organizationId);
+      }
+
+      /* ---------------- Modules ---------------- */
+
+      match /modules/{moduleId} {
+        allow get: if isOrgMember(organizationId);
+        allow list, create: if isOrgMember(organizationId);
+        allow update: if isOrgMember(organizationId); 
+        allow delete: if isOrgAdmin(organizationId);
+
+        match /sprints/{sprintId} {
+          allow get, list: if isModuleMember(organizationId, moduleId);
+          allow create, update, delete: if isModuleAdmin(organizationId, moduleId)
+            && isExistingDoc();
+        }
+      }
+
+      /* =========================================================================
+         Issues (ORG-SCOPED)
+         ========================================================================= */
+      match /issues/{issueId} {
+
+        /* -------- READ -------- */
+        allow get, list: if isOrgMember(organizationId);
+
+        /* -------- CREATE -------- */
+        allow create: if isOrgMember(organizationId)
+          && request.auth != null
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.reporterId == request.auth.uid;
+
+        /* -------- UPDATE -------- */
+        allow update: if isOrgMember(organizationId) && resource != null;
+
+        /* -------- DELETE -------- */
+        allow delete: if isOrgAdmin(organizationId)
+          && resource != null;
+
+        /* -------- COMMENTS -------- */
+        match /comments/{commentId} {
+          allow get, list: if isOrgMember(organizationId);
+
+          allow create: if isOrgMember(organizationId)
+            && request.resource.data.userId == request.auth.uid
+            && request.resource.data.text is string;
+
+          allow update: if resource != null
+            && resource.data.userId == request.auth.uid
+            && request.resource.data.userId == resource.data.userId;
+
+          allow delete: if resource != null
+            && (
+              resource.data.userId == request.auth.uid
+              || isOrgAdmin(organizationId)
+            );
+        }
+      }
+    }
+
+    /* =========================================================================
+       Global Read-Only / Shared Collections
+       ========================================================================= */
+
+    match /labels/{labelId} {
+      allow get, list, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /attachments/{attachmentId} {
+      allow get, list, create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /audit_logs/{auditLogId} {
+      allow get, list: if isAdminRole();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    /* =========================================================================
+       Global Invite Lookups
+       ========================================================================= */
+    match /invites/{inviteId} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+  }
+}
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /avatars/{userId}/{allPaths=**} {
+      allow read;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /attachments/{organizationId}/{issueId}/{allPaths=**} {
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/organizations/$(organizationId)).data.members[request.auth.uid] != null;
+    }
+  }
+}

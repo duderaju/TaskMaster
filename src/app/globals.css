@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 262 84% 53%; /* Refined Indigo */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 262 80% 96%; /* Subtle Indigo Tint for Hover */
+    --accent-foreground: 262 84% 40%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 262 84% 53%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 262 84% 53%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 262 84% 53%;
+
+    /* Custom Table Colors */
+    --table-header-background: 240 4.8% 95.9%;
+    --table-row-hover-background: 240 4.8% 94%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 262 84% 63%; /* Lighter Indigo for Dark Mode */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 262 84% 63%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 262 84% 63%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 262 84% 63%;
+
+    /* Custom Table Colors */
+    --table-header-background: 240 3.7% 15.9%;
+    --table-row-hover-background: 240 3.7% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Status Dot Styles */
+@layer utilities {
+  .bg-status-planned {
+    background-color: #f59e0b; /* Amber */
+  }
+  .dark .bg-status-planned {
+    background-color: #fcd34d;
+  }
+
+  .bg-status-active {
+    background-color: #16a34a; /* Green */
+  }
+  .dark .bg-status-active {
+    background-color: #4ade80;
+  }
+
+  .bg-status-on-hold {
+    background-color: #64748b; /* Slate */
+  }
+  .dark .bg-status-on-hold {
+    background-color: #94a3b8;
+  }
+
+  .bg-status-archived {
+    background-color: #71717a; /* Zinc */
+  }
+  .dark .bg-status-archived {
+    background-color: #a1a1aa;
+  }
+
+  .bg-status-draft {
+    background-color: #a855f7; /* Purple */
+  }
+  .dark .bg-status-draft {
+    background-color: #c084fc;
+  }
+
+  .bg-status-done {
+    background-color: #ef4444; /* Bright Red */
+  }
+  .dark .bg-status-done {
+    background-color: #f87171;
+  }
+  
+  /* High-fidelity selection highlighting for cmdk items and dropdown items */
+  [cmdk-item][data-selected='true'],
+  [cmdk-item]:hover,
+  [role="option"]:hover,
+  [role="menuitem"]:hover,
+  [role="menuitemcheckbox"]:hover,
+  [role="menuitemradio"]:hover,
+  [data-highlighted],
+  [data-state=checked] {
+    @apply bg-primary/10 text-primary font-bold !important;
+  }
+
+  [cmdk-item] {
+    @apply text-foreground transition-colors duration-150 cursor-pointer;
+  }
+  
+  .editable-input {
+      @apply w-full max-w-full overflow-hidden cursor-text whitespace-pre-wrap break-all outline-none focus:outline-none ring-0 focus:ring-0 border-0 focus:border-0 p-0 m-0;
+  }
+  .editable-mirror {
+      @apply invisible absolute top-0 left-0 w-full max-w-full overflow-hidden whitespace-pre-wrap break-all p-0 m-0 z-[-1];
+  }
+}
+
+/* Animation Speed Optimizations */
+.animate-in {
+  animation-duration: 150ms !important;
+}
+.animate-out {
+  animation-duration: 100ms !important;
+}

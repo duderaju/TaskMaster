@@ -1,0 +1,824 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Reference to Organization. (Relationship: Organization 1:N User)"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "User's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "User's last name."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role within the organization (Admin, Project Manager, Full Stack Developer, Frontend Developer, Backend Developer, UI/UX Designer, QA Tester, DevOps Engineer, Viewer)."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "URL of the user's avatar image.",
+          "format": "uri"
+        },
+        "status": {
+          "type": "string",
+          "description": "User's status (active/inactive)."
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "email",
+        "firstName",
+        "lastName",
+        "role"
+      ]
+    },
+    "Organization": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Organization",
+      "type": "object",
+      "description": "Represents an organization or workspace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the organization.",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the organization."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the organization."
+        },
+        "integrations": {
+          "type": "object",
+          "description": "State of third-party integrations.",
+          "properties": {
+            "slack": { "type": "boolean" },
+            "github": { "type": "boolean" },
+            "google-drive": { "type": "boolean" }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Module": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Module",
+      "type": "object",
+      "description": "Represents a module.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the module.",
+          "format": "uuid"
+        },
+        "organizationId": {
+          "type": "string",
+          "description": "Reference to Organization. (Relationship: Organization 1:N Module)"
+        },
+        "key": {
+          "type": "string",
+          "description": "Module key (e.g., MOD-101)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the module."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the module."
+        },
+        "leadId": {
+          "type": "string",
+          "description": "Reference to User who is the module lead. (Relationship: User 1:N Module)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of module (Software Module, Business Module)."
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "key",
+        "name",
+        "leadId",
+        "type"
+      ]
+    },
+    "Issue": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Issue",
+      "type": "object",
+      "description": "Represents an issue or task.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the issue.",
+          "format": "uuid"
+        },
+        "organizationId": {
+            "type": "string",
+            "description": "ID of the parent organization"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to Module. (Relationship: Module 1:N Issue)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of issue (Epic, Story, Task, Bug, Sub-task)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the issue."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the issue (rich text)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the issue (Backlog, To Do, In Progress, Code Review, QA, Done)."
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority of the issue (Low, Medium, High, Critical)."
+        },
+        "assigneeId": {
+          "type": "string",
+          "description": "Reference to User assigned to the issue. (Relationship: User 1:N Issue (assignee))"
+        },
+        "reporterId": {
+          "type": "string",
+          "description": "Reference to User who reported the issue. (Relationship: User 1:N Issue (reporter))"
+        },
+        "labelIds": {
+          "type": "array",
+          "description": "References to Labels. (Relationship: Label N:N Issue)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attachmentIds": {
+          "type": "array",
+          "description": "References to Attachments. (Relationship: Attachment 1:N Issue)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "links": {
+          "type": "array",
+          "description": "A list of related links.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "title": { "type": "string" },
+              "addedAt": { "type": "string", "format": "date-time" },
+              "addedBy": { "type": "string" }
+            },
+            "required": ["id", "url", "title", "addedAt", "addedBy"]
+          }
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Due date for the issue.",
+          "format": "date-time"
+        },
+        "storyPoints": {
+          "type": "number",
+          "description": "Story points assigned to the issue."
+        }
+      },
+      "required": [
+        "id",
+        "organizationId",
+        "moduleId",
+        "type",
+        "title",
+        "status",
+        "priority",
+        "reporterId"
+      ]
+    },
+    "Sprint": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Sprint",
+      "type": "object",
+      "description": "Represents a sprint in Scrum.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the sprint.",
+          "format": "uuid"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to Module. (Relationship: Module 1:N Sprint)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the sprint."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Start date of the sprint.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "End date of the sprint.",
+          "format": "date-time"
+        },
+        "issueIds": {
+          "type": "array",
+          "description": "References to Issues in the sprint. (Relationship: Sprint 1:N Issue)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "moduleId",
+        "name",
+        "startDate",
+        "endDate"
+      ]
+    },
+    "Comment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Comment",
+      "type": "object",
+      "description": "Represents a comment on an issue.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the comment.",
+          "format": "uuid"
+        },
+        "issueId": {
+          "type": "string",
+          "description": "Reference to Issue. (Relationship: Issue 1:N Comment)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who created the comment. (Relationship: User 1:N Comment)"
+        },
+        "text": {
+          "type": "string",
+          "description": "Text content of the comment."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the comment was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "issueId",
+        "userId",
+        "text",
+        "createdAt"
+      ]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a notification for a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the notification.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User to whom the notification is addressed. (Relationship: User 1:N Notification)"
+        },
+        "message": {
+          "type": "string",
+          "description": "Text content of the notification."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of notification (Task assigned, Status changed, Comment added, Sprint started/ended)."
+        },
+        "issueId": {
+          "type": "string",
+          "description": "Reference to Issue. (Relationship: Issue 1:N Notification)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the notification was created.",
+          "format": "date-time"
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Indicates whether the notification has been read."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "message",
+        "type",
+        "createdAt",
+        "read"
+      ]
+    },
+    "AuditLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AuditLog",
+      "type": "object",
+      "description": "Represents an audit log entry for tracking changes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the audit log entry.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who performed the action. (Relationship: User 1:N AuditLog)"
+        },
+        "entityType": {
+          "type": "string",
+          "description": "Type of entity that was modified (User, Module, Issue, etc.)."
+        },
+        "entityId": {
+          "type": "string",
+          "description": "Identifier of the entity that was modified."
+        },
+        "action": {
+          "type": "string",
+          "description": "Action performed (create, update, delete)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the action was performed.",
+          "format": "date-time"
+        },
+        "details": {
+          "type": "string",
+          "description": "Detailed information about the changes made (JSON format)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "entityType",
+        "entityId",
+        "action",
+        "timestamp"
+      ]
+    },
+    "Label": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Label",
+      "type": "object",
+      "description": "Represents a label or tag that can be associated with issues.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the label.",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the label."
+        },
+        "color": {
+          "type": "string",
+          "description": "Color associated with the label (e.g., hex code)."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "color"
+      ]
+    },
+    "Attachment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Attachment",
+      "type": "object",
+      "description": "Represents a file attachment associated with an issue.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the attachment.",
+          "format": "uuid"
+        },
+        "filename": {
+          "type": "string",
+          "description": "Name of the attached file."
+        },
+        "contentType": {
+          "type": "string",
+          "description": "MIME type of the attachment (e.g., image/png, application/pdf)."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL where the attachment can be accessed.",
+          "format": "uri"
+        },
+        "size": {
+          "type": "number",
+          "description": "Size of the attachment in bytes."
+        }
+      },
+      "required": [
+        "id",
+        "filename",
+        "contentType",
+        "url",
+        "size"
+      ]
+    },
+     "InviteLookup": {
+      "title": "Invite Lookup",
+      "type": "object",
+      "description": "A lookup document to map an invite ID to an organization ID.",
+      "properties": {
+        "organizationId": {
+          "type": "string",
+          "description": "The ID of the organization the invite belongs to."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address invited."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role intended for the invitee."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the lookup was created, useful for TTL policies.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "organizationId",
+        "email",
+        "createdAt"
+      ]
+    },
+    "Workflow": {
+      "title": "Workflow",
+      "type": "object",
+      "description": "Represents a custom workflow for issues.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string", "enum": ["Backlog", "To Do", "In Progress", "In Review", "Done"] },
+              "color": { "type": "string" }
+            }
+          }
+        },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "states"]
+    },
+    "AutomationRule": {
+      "title": "Automation Rule",
+      "type": "object",
+      "description": "Represents an automated rule within an organization.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "trigger": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "trigger", "active"]
+    },
+    "Webhook": {
+      "title": "Webhook",
+      "type": "object",
+      "description": "Represents a configured webhook for real-time events.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "url", "active"]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/organizations/{organizationId}",
+        "definition": {
+          "entityName": "Organization",
+          "schema": {
+            "$ref": "#/backend/entities/Organization"
+          },
+          "description": "Represents an organization. Includes 'members' map for authorization independence.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Represents a user. User data is generally private and accessible only to the user themselves and organization admins.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/modules/{moduleId}",
+        "definition": {
+          "entityName": "Module",
+          "schema": {
+            "$ref": "#/backend/entities/Module"
+          },
+          "description": "Represents a module within an organization. Includes denormalized 'members' map for authorization independence.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "moduleId",
+              "description": "Unique identifier for the module."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/issues/{issueId}",
+        "definition": {
+          "entityName": "Issue",
+          "schema": {
+            "$ref": "#/backend/entities/Issue"
+          },
+          "description": "Represents an issue within an organization. Access is controlled by organization membership.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "issueId",
+              "description": "Unique identifier for the issue."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/modules/{moduleId}/sprints/{sprintId}",
+        "definition": {
+          "entityName": "Sprint",
+          "schema": {
+            "$ref": "#/backend/entities/Sprint"
+          },
+          "description": "Represents a sprint within a module.  Access controlled via module membership.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "moduleId",
+              "description": "Unique identifier for the module."
+            },
+            {
+              "name": "sprintId",
+              "description": "Unique identifier for the sprint."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/issues/{issueId}/comments/{commentId}",
+        "definition": {
+          "entityName": "Comment",
+          "schema": {
+            "$ref": "#/backend/entities/Comment"
+          },
+          "description": "Represents a comment on an issue. Access controlled via organization membership.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "issueId",
+              "description": "Unique identifier for the issue."
+            },
+            {
+              "name": "commentId",
+              "description": "Unique identifier for the comment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Represents a notification for a user. Path-based ownership ensures only the user can access their notifications.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "notificationId",
+              "description": "Unique identifier for the notification."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/audit_logs/{auditLogId}",
+        "definition": {
+          "entityName": "AuditLog",
+          "schema": {
+            "$ref": "#/backend/entities/AuditLog"
+          },
+          "description": "Represents an audit log entry.  Global collection; restricted access to admins.",
+          "params": [
+            {
+              "name": "auditLogId",
+              "description": "Unique identifier for the audit log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/labels/{labelId}",
+        "definition": {
+          "entityName": "Label",
+          "schema": {
+            "$ref": "#/backend/entities/Label"
+          },
+          "description": "Represents a label.  Global collection, accessible to all users in the organization.",
+          "params": [
+            {
+              "name": "labelId",
+              "description": "Unique identifier for the label."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/attachments/{attachmentId}",
+        "definition": {
+          "entityName": "Attachment",
+          "schema": {
+            "$ref": "#/backend/entities/Attachment"
+          },
+          "description": "Represents an attachment. Global collection, but the URL should be signed and access-controlled by the backend.",
+          "params": [
+            {
+              "name": "attachmentId",
+              "description": "Unique identifier for the attachment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/invites/{inviteId}",
+        "definition": {
+          "entityName": "InviteLookup",
+          "schema": {
+            "$ref": "#/backend/entities/InviteLookup"
+          },
+          "description": "Top-level collection for mapping invite tokens to organizations. Used to avoid collection group queries. Admin SDK access only.",
+          "params": [
+            {
+              "name": "inviteId",
+              "description": "Unique identifier for the invite."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/workflows/{workflowId}",
+        "definition": {
+          "entityName": "Workflow",
+          "schema": {
+            "$ref": "#/backend/entities/Workflow"
+          },
+          "description": "Represents a workflow within an organization. Defines the available statuses for issues.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "workflowId",
+              "description": "Unique identifier for the workflow."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/automation_rules/{ruleId}",
+        "definition": {
+          "entityName": "AutomationRule",
+          "schema": {
+            "$ref": "#/backend/entities/AutomationRule"
+          },
+          "description": "Represents an automated rule within an organization.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "ruleId",
+              "description": "Unique identifier for the rule."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/organizations/{organizationId}/webhooks/{webhookId}",
+        "definition": {
+          "entityName": "Webhook",
+          "schema": {
+            "$ref": "#/backend/entities/Webhook"
+          },
+          "description": "Represents a webhook within an organization.",
+          "params": [
+            {
+              "name": "organizationId",
+              "description": "Unique identifier for the organization."
+            },
+            {
+              "name": "webhookId",
+              "description": "Unique identifier for the webhook."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support a Jira-like module and task management system, prioritizing security, scalability, and debuggability. The structure enforces Authorization Independence by denormalizing authorization data, enabling atomic operations and simplifying security rules. Structural Segregation ensures collections contain documents with homogeneous security needs.  Access Modeling follows a consistent pattern for private (path-based ownership) and collaborative data (membership maps).  Data Clarity and Predictability are maintained through explicit state modeling and strict naming conventions. \n\n**Authorization Independence:**  The `members` map in Organization and Module documents is denormalized into child collections (e.g., Modules).  This eliminates the need for `get()` calls in security rules to check parent document attributes.\n\n**QAPs (Rules are not Filters):**\n*   **Secure List Operations:** The structure allows secure `list` operations because authorization data is present within each document, enabling rules to validate access without needing to fetch related documents.\n*   **Path-Based Ownership:** For user-owned data (e.g., Notifications), the hierarchical path `/users/{userId}/notifications/{notificationId}` ensures that only the user can access their own notifications.  This eliminates filtering in rules.\n*   **Membership Maps:** Collaborative data (e.g., Modules, Issues) use membership maps to define user roles.  Security rules can efficiently check if a user is a member and has the necessary role without filtering all documents.\n\n**CORS Implementation**: Implementing CORS will be done in the backend application layer using middleware. No Firestore configuration is required to solve CORS issues."
+  }
+}
