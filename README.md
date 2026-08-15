@@ -92,4 +92,4 @@ src/
 
 ---
 
-&copy; 2025 TaskMaster Global | Designed for High-Performance Teams.
+&copy; 2026 TaskMaster Global | Designed for High-Performance Teams.
