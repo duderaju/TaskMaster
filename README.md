@@ -1,55 +1,81 @@
+# TaskMaster | Elite Project & Task Management
 
-# TaskMaster - Production Deployment Guide
+TaskMaster is a high-fidelity, production-grade project management system built for high-performance teams. Inspired by industry leaders and refined with a custom "Elite" design language, it provides a seamless, real-time environment for managing organizational modules, tracking complex work items, and scaling team collaboration.
 
-TaskMaster is a high-fidelity, production-grade project management system. Follow these steps to ensure a successful deployment and professional branding.
+## 🚀 Vision & Design Philosophy
 
-## 🚀 Deployment Steps
+TaskMaster is engineered to eliminate the visual clutter of traditional management tools.
+- **Eye-Sight View**: Every configuration panel is optimized for a single-page, non-scrollable view.
+- **Google-Inspired Architecture**: Minimalist card layouts with soft layered shadows and high-contrast typography.
+- **Translucent Identity**: Sophisticated use of backdrop blurs and "Muted Flush" inputs for a focused user experience.
 
-### 1. Push to GitHub
-1. Create a new repository on [GitHub](https://github.com/new).
-2. Run the following in your terminal:
+## 🛠 Features
+
+### 1. Workspace Intelligence
+- **Mission Pulse Dashboard**: Real-time KPI tracking with a high-fidelity donut visualization of issue distribution.
+- **Organizational Modules**: Grid and List views optimized for professional project containment and lifecycle management.
+- **Adaptive Workflows**: Custom states (Backlog, Blocked, In Review, etc.) with vibrant visual "Glow Indicators."
+
+### 2. Elite UI/UX
+- **Unified Issue Hub**: A sophisticated side-panel system for non-blocking task updates, comments, and attachments.
+- **RBAC Enforcement**: Role-Based Access Control (Admin, Project Manager, Developer, etc.) synced across Firestore and Custom Claims.
+- **Tactile Feedback**: Standardized "Elite" hover states and scaling transitions across all interactive triggers.
+
+### 3. Enterprise Infrastructure
+- **Secure Identity Protocol**: OTP (One-Time Password) email verification and custom token authentication.
+- **Administrative Audit Log**: ISO-compliant real-time monitoring of all critical workspace operations.
+- **Automation & Webhooks**: Create custom rules and receive external event triggers to keep the team in sync.
+
+## 💻 Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router & Server Actions)
+- **Database/Auth**: [Firebase 11](https://firebase.google.com/) (Firestore, Auth, Storage)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Components**: [ShadCN UI](https://ui.shadcn.com/) (Radix UI Primitives)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Analytics**: [Recharts](https://recharts.org/)
+
+## 🏁 Getting Started
+
+### Local Development
+1. **Clone the repository** and install dependencies:
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/task-master.git
-   git push -u origin main
+   npm install
+   ```
+2. **Configure Environment Variables**:
+   Create a `.env.local` file with your Firebase configuration and SMTP credentials.
+3. **Run the development server**:
+   ```bash
+   npm run dev
    ```
 
-### 2. Deploy to Firebase App Hosting
-1. Go to the [Firebase Console](https://console.firebase.google.com/).
-2. Select your project and navigate to **Build > App Hosting**.
-3. Connect your GitHub repository.
-4. Select the `main` branch and follow the prompts.
+## 🚢 Production Deployment
 
-### 3. Critical Environment Variables
-You MUST configure these keys in the **App Hosting Dashboard > Settings** to enable professional routing and email delivery. Without these, the app will fallback to `localhost` links.
+### 1. Deploy to Firebase App Hosting
+Connect your GitHub repository to **Firebase Console > Build > App Hosting**. TaskMaster is optimized for the App Hosting runtime.
+
+### 2. Critical Environment Variables
+You MUST configure these in the **App Hosting Dashboard** to enable professional routing and transactional emails:
 
 ```env
-# Production App URL (REQUIRED for professional invitation links)
-# This removes "localhost" from your invitation emails.
+# Production App URL (Removes 'localhost' from invitations)
 APP_URL="https://your-deployed-app.com"
 
-# SMTP Configuration (REQUIRED for Transactional Emails)
+# SMTP Configuration (Required for Transactional Emails)
 SMTP_USER="your-email@gmail.com"
 SMTP_PASS="your-app-specific-password"
 SMTP_FROM_NAME="TaskMaster"
 SMTP_FROM_EMAIL="noreply@yourdomain.com"
 
-# Admin SDK (REQUIRED for User Provisioning & Invites)
-# Copy the entire JSON from your Firebase Service Account Key file
+# Admin SDK (Required for RBAC & Identity Management)
 FIREBASE_SERVICE_ACCOUNT='{"type": "service_account", ...}'
 ```
 
-## ⚠️ Branding Troubleshooting
-If the sender name in emails still appears as "EnterpriseFlow" or your Gmail account name:
-1. **Gmail Override**: Gmail SMTP often overrides the "From" name with the name of the Google Account used to send the email. Ensure your Google Account name is set to "TaskMaster" in your Google Account settings.
-2. **ENV Sync**: Verify that `SMTP_FROM_NAME` is explicitly set to `"TaskMaster"` in your production environment variables.
+## ⚠️ Branding Consistency
+If the sender name in emails appears as "TaskMaster" but the layout feels inconsistent:
+1. **SMTP Sync**: Verify `SMTP_FROM_NAME` is set correctly in production envs.
+2. **Identity Handshake**: Ensure the `APP_URL` matches your custom domain exactly to maintain secure cookie and redirect integrity.
 
-## 🛠 Features
-- **Professional Invitation Hub**: Intelligent identity detection and account switching.
-- **Dynamic Routing**: Links automatically adjust based on `APP_URL`.
-- **MNC-Standard Navigation**: High-fidelity triggers with active state highlights.
-- **Real-time Collaboration**: Powered by Firestore `onSnapshot`.
-- **Administrative Audit Log**: ISO-compliant monitoring UI.
+---
+
+&copy; 2025 TaskMaster Global | Designed for High-Performance Teams.
