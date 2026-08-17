@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { 
   useFirestore, 
   useUser, 
@@ -22,7 +22,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   ChevronsLeft, 
-  ChevronsRight 
+  ChevronsRight,
+  Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -46,14 +47,14 @@ import { CreateIssueDialog } from '@/components/create-issue-dialog';
 import { IssueDetailPanel } from '@/components/issue-detail-panel';
 import { IssuesTableView } from '@/components/issues-table-view';
 import { IssuesCardView } from '@/components/issues-card-view';
-import { StatusBadge } from '@/components/status-badge';
-import { PriorityBadge } from '@/components/priority-badge';
+import { IssueStatus, StatusBadge } from '@/components/status-badge';
+import { IssuePriority, PriorityBadge } from '@/components/priority-badge';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { cn } from '@/lib/utils';
 
 const priorityOrder: any = { 'Urgent': 5, 'High': 4, 'Medium': 3, 'Low': 2, 'None': 1 };
 
-export default function IssuesPage() {
+function IssuesPageInner() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const organizationId = user?.organizationId;
@@ -163,16 +164,16 @@ export default function IssuesPage() {
 
   const statusOptions = Object.keys(StatusBadge.statusConfig).map(status => ({
     value: status,
-    label: StatusBadge.statusConfig[status as any].label,
-    icon: StatusBadge.statusConfig[status as any].icon,
-    color: StatusBadge.statusConfig[status as any].color,
+    label: StatusBadge.statusConfig[status as IssueStatus].label,
+    icon: StatusBadge.statusConfig[status as IssueStatus].icon,
+    color: StatusBadge.statusConfig[status as IssueStatus].color,
   }));
 
   const priorityOptions = Object.keys(PriorityBadge.priorityConfig).map(priority => ({
     value: priority,
-    label: PriorityBadge.priorityConfig[priority as any].label,
-    icon: PriorityBadge.priorityConfig[priority as any].icon,
-    iconClassName: PriorityBadge.priorityConfig[priority as any].iconClassName,
+    label: PriorityBadge.priorityConfig[priority as IssuePriority].label,
+    icon: PriorityBadge.priorityConfig[priority as IssuePriority].icon,
+    iconClassName: PriorityBadge.priorityConfig[priority as IssuePriority].iconClassName,
   }));
 
   const memberOptions = [{ value: 'unassigned', label: 'Unassigned', icon: User }, ...allMembers.map(m => ({ value: m.id, label: `${m.firstName} ${m.lastName}`, avatarUrl: m.avatarUrl || undefined, fallback: `${m.firstName?.[0] || ''}${m.lastName?.[0] || ''}`.toUpperCase() }))];
@@ -214,7 +215,7 @@ export default function IssuesPage() {
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
           <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="h-11 px-4 border-muted/60 bg-card/50 hover:bg-muted/50">Status <ChevronDown className="ml-2 h-4 w-4 opacity-50" /></Button></DropdownMenuTrigger><DropdownMenuContent className="w-48">{statusOptions.map(option => (<DropdownMenuCheckboxItem key={option.value} checked={statusFilter.includes(option.value)} onSelect={e => e.preventDefault()} onCheckedChange={() => setStatusFilter(prev => prev.includes(option.value) ? prev.filter(s => s !== option.value) : [...prev, option.value])}><div className="flex items-center gap-2"><option.icon className={cn("h-4 w-4", option.color)} /><span>{option.label}</span></div></DropdownMenuCheckboxItem>))}</DropdownMenuContent></DropdownMenu>
-          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="h-11 px-4 border-muted/60 bg-card/50 hover:bg-muted/50">Assignee <ChevronDown className="ml-2 h-4 w-4 opacity-50" /></Button></DropdownMenuTrigger><DropdownMenuContent className="w-56 max-h-80 overflow-y-auto">{memberOptions.map(option => (<DropdownMenuCheckboxItem key={option.value} checked={assigneeFilter.includes(option.value)} onSelect={e => e.preventDefault()} onCheckedChange={() => setAssigneeFilter(prev => prev.includes(option.value) ? prev.filter(s => s !== option.value) : [...prev, option.value])}><div className="flex items-center gap-2">{option.avatarUrl ? <Avatar className="h-5 w-5"><AvatarImage src={option.avatarUrl || undefined} /><AvatarFallback className="text-[9px] font-bold">{option.fallback}</AvatarFallback></Avatar> : <User className="h-4 w-4" />}<span className="truncate">{option.label}</span></div></DropdownMenuCheckboxItem>))}</DropdownMenuContent></DropdownMenu>
+          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="h-11 px-4 border-muted/60 bg-card/50 hover:bg-muted/50">Assignee <ChevronDown className="ml-2 h-4 w-4 opacity-50" /></Button></DropdownMenuTrigger><DropdownMenuContent className="w-56 max-h-80 overflow-y-auto">{memberOptions.map(option => (<DropdownMenuCheckboxItem key={option.value} checked={assigneeFilter.includes(option.value)} onSelect={e => e.preventDefault()} onCheckedChange={() => setAssigneeFilter(prev => prev.includes(option.value) ? prev.filter(s => s !== option.value) : [...prev, option.value])}><div className="flex items-center gap-2">{'avatarUrl' in option && option.avatarUrl ? <Avatar className="h-5 w-5"><AvatarImage src={option.avatarUrl || undefined} /><AvatarFallback className="text-[9px] font-bold">{'fallback' in option ? option.fallback : ''}</AvatarFallback></Avatar> : <User className="h-4 w-4" />}<span className="truncate">{option.label}</span></div></DropdownMenuCheckboxItem>))}</DropdownMenuContent></DropdownMenu>
           <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="h-11 px-4 border-muted/60 bg-card/50 hover:bg-muted/50">Priority <ChevronDown className="ml-2 h-4 w-4 opacity-50" /></Button></DropdownMenuTrigger><DropdownMenuContent className="w-48">{priorityOptions.map(option => (<DropdownMenuCheckboxItem key={option.value} checked={priorityFilter.includes(option.value)} onSelect={e => e.preventDefault()} onCheckedChange={() => setPriorityFilter(prev => prev.includes(option.value) ? prev.filter(s => s !== option.value) : [...prev, option.value])}><div className="flex items-center gap-2"><option.icon className={cn("h-4 w-4", option.iconClassName)} /><span>{option.label}</span></div></DropdownMenuCheckboxItem>))}</DropdownMenuContent></DropdownMenu>
           
           <Separator orientation="vertical" className="h-8 mx-1 hidden lg:block" />
@@ -244,7 +245,7 @@ export default function IssuesPage() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             {paginationRange?.map((page, index) => typeof page === 'string' ? <span key={index} className="px-2 py-1 text-muted-foreground">...</span> : <Button key={index} variant={page === currentPage ? "default" : "outline"} size="icon" className="h-9 w-9 border-muted/60" onClick={() => setCurrentPage(page)}>{page}</Button>)}
-            <Button variant="outline" size="icon" className="h-9 w-9 border-muted/60" onClick={() => setCurrentPage(p + 1)} disabled={currentPage === totalPages}>
+            <Button variant="outline" size="icon" className="h-9 w-9 border-muted/60" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === totalPages}>
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" className="h-9 w-9 border-muted/60" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
@@ -256,5 +257,17 @@ export default function IssuesPage() {
 
       <IssueDetailPanel issueId={selectedIssueId} onClose={() => handleSetSelectedIssue(null)} modules={modules} organization={organization} members={allMembers} onImagePreview={setPreviewImage} />
     </>
+  );
+}
+
+export default function IssuesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <IssuesPageInner />
+    </Suspense>
   );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -30,7 +29,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Mail, Lock, User, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Logo } from '@/components/logo';
 
 const formSchema = z.object({
@@ -47,7 +46,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function SignUpPage() {
+function SignUpForm() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,11 +110,11 @@ export default function SignUpPage() {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ 
       prompt: 'select_account',
-      login_hint: invitedEmail || undefined
+      login_hint: invitedEmail || ''
     });
 
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);  
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
         await new Promise(resolve => setTimeout(resolve, 800));
@@ -285,5 +284,17 @@ export default function SignUpPage() {
         <Link href={`/sign-in${inviteToken ? '?invite_token=' + inviteToken : ''}${invitedEmail ? '&invited_email=' + invitedEmail : ''}`} className="text-primary hover:underline font-bold decoration-2 underline-offset-4">Sign in instead</Link>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full max-w-md flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <SignUpForm />
+    </Suspense>
   );
 }

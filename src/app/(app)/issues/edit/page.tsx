@@ -1,11 +1,12 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Unified Edit Interface: Redirects to the Side Panel management system.
  */
-export default function EditIssueRedirect() {
+function EditIssueRedirectInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const issueId = searchParams.get('issueId');
@@ -19,4 +20,16 @@ export default function EditIssueRedirect() {
   }, [issueId, router]);
 
   return null;
+}
+
+export default function EditIssueRedirect() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <EditIssueRedirectInner />
+    </Suspense>
+  );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -42,7 +41,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -61,7 +60,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function SignInPage() {
+function SignInForm() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -172,7 +171,7 @@ export default function SignInPage() {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ 
       prompt: 'select_account',
-      login_hint: invitedEmail || undefined
+      login_hint: invitedEmail || ''
     });
 
     try {
@@ -489,5 +488,17 @@ export default function SignInPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full max-w-md flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }
